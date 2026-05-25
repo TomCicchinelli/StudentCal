@@ -1,0 +1,491 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A001 /* StudyPlannerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F001 /* StudyPlannerApp.swift */; };
+		A002 /* Exam.swift in Sources */ = {isa = PBXBuildFile; fileRef = F002 /* Exam.swift */; };
+		A003 /* StudyLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = F003 /* StudyLog.swift */; };
+		A004 /* ExamRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F004 /* ExamRepository.swift */; };
+		A005 /* LocalExamRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F005 /* LocalExamRepository.swift */; };
+		A006 /* AppStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F006 /* AppStore.swift */; };
+		A007 /* DateHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = F007 /* DateHelpers.swift */; };
+		A008 /* StudyPlanCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F008 /* StudyPlanCalculator.swift */; };
+		A009 /* Colors.swift in Sources */ = {isa = PBXBuildFile; fileRef = F009 /* Colors.swift */; };
+		A010 /* ProgressRing.swift in Sources */ = {isa = PBXBuildFile; fileRef = F010 /* ProgressRing.swift */; };
+		A011 /* ExamDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F011 /* ExamDetailView.swift */; };
+		A012 /* ExamFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F012 /* ExamFormView.swift */; };
+		A013 /* ExamsTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F013 /* ExamsTabView.swift */; };
+		A014 /* CalendarDayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F014 /* CalendarDayView.swift */; };
+		A015 /* CalendarMonthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F015 /* CalendarMonthView.swift */; };
+		A016 /* CalendarTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F016 /* CalendarTabView.swift */; };
+		A017 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F017 /* MainTabView.swift */; };
+		A018 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F018 /* Assets.xcassets */; };
+		E23C1C732FBB991300F99A34 /* UserEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = E23C1C722FBB990C00F99A34 /* UserEvent.swift */; };
+		E23C1C752FBB994F00F99A34 /* Eventformview.swift in Sources */ = {isa = PBXBuildFile; fileRef = E23C1C742FBB994600F99A34 /* Eventformview.swift */; };
+		E23C1C772FBCE50700F99A34 /* Studyscheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = E23C1C762FBCE4FF00F99A34 /* Studyscheduler.swift */; };
+		E27825912FC03B390074EFB1 /* Keyboarddismiss.swift in Sources */ = {isa = PBXBuildFile; fileRef = E27825902FC03B330074EFB1 /* Keyboarddismiss.swift */; };
+		E2D707012FC04E810047E22F /* Previewrepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2D707002FC04E7C0047E22F /* Previewrepository.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		E23C1C722FBB990C00F99A34 /* UserEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserEvent.swift; sourceTree = "<group>"; };
+		E23C1C742FBB994600F99A34 /* Eventformview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Eventformview.swift; sourceTree = "<group>"; };
+		E23C1C762FBCE4FF00F99A34 /* Studyscheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Studyscheduler.swift; sourceTree = "<group>"; };
+		E27825902FC03B330074EFB1 /* Keyboarddismiss.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keyboarddismiss.swift; sourceTree = "<group>"; };
+		E2D707002FC04E7C0047E22F /* Previewrepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Previewrepository.swift; sourceTree = "<group>"; };
+		F001 /* StudyPlannerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyPlannerApp.swift; sourceTree = "<group>"; };
+		F002 /* Exam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Exam.swift; sourceTree = "<group>"; };
+		F003 /* StudyLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyLog.swift; sourceTree = "<group>"; };
+		F004 /* ExamRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExamRepository.swift; sourceTree = "<group>"; };
+		F005 /* LocalExamRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalExamRepository.swift; sourceTree = "<group>"; };
+		F006 /* AppStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStore.swift; sourceTree = "<group>"; };
+		F007 /* DateHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateHelpers.swift; sourceTree = "<group>"; };
+		F008 /* StudyPlanCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyPlanCalculator.swift; sourceTree = "<group>"; };
+		F009 /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
+		F010 /* ProgressRing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressRing.swift; sourceTree = "<group>"; };
+		F011 /* ExamDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExamDetailView.swift; sourceTree = "<group>"; };
+		F012 /* ExamFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExamFormView.swift; sourceTree = "<group>"; };
+		F013 /* ExamsTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExamsTabView.swift; sourceTree = "<group>"; };
+		F014 /* CalendarDayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarDayView.swift; sourceTree = "<group>"; };
+		F015 /* CalendarMonthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarMonthView.swift; sourceTree = "<group>"; };
+		F016 /* CalendarTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarTabView.swift; sourceTree = "<group>"; };
+		F017 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		F018 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		FAPP /* StudyPlanner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StudyPlanner.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		PH_FW /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		GRP_APP /* StudyPlanner */ = {
+			isa = PBXGroup;
+			children = (
+				GRP_APPENTRY /* App */,
+				GRP_MODELS /* Models */,
+				GRP_REPO /* Repository */,
+				GRP_VM /* ViewModels */,
+				GRP_UTILS /* Utilities */,
+				GRP_VIEWS /* Views */,
+				F018 /* Assets.xcassets */,
+			);
+			path = StudyPlanner;
+			sourceTree = "<group>";
+		};
+		GRP_APPENTRY /* App */ = {
+			isa = PBXGroup;
+			children = (
+				F001 /* StudyPlannerApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		GRP_MODELS /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				E23C1C722FBB990C00F99A34 /* UserEvent.swift */,
+				F002 /* Exam.swift */,
+				F003 /* StudyLog.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		GRP_PRODUCTS /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				FAPP /* StudyPlanner.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		GRP_REPO /* Repository */ = {
+			isa = PBXGroup;
+			children = (
+				E2D707002FC04E7C0047E22F /* Previewrepository.swift */,
+				F004 /* ExamRepository.swift */,
+				F005 /* LocalExamRepository.swift */,
+			);
+			path = Repository;
+			sourceTree = "<group>";
+		};
+		GRP_ROOT = {
+			isa = PBXGroup;
+			children = (
+				GRP_APP /* StudyPlanner */,
+				GRP_PRODUCTS /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		GRP_UTILS /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				E27825902FC03B330074EFB1 /* Keyboarddismiss.swift */,
+				E23C1C762FBCE4FF00F99A34 /* Studyscheduler.swift */,
+				F007 /* DateHelpers.swift */,
+				F008 /* StudyPlanCalculator.swift */,
+				F009 /* Colors.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		GRP_VIEWS /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				GRP_VIEWS_COMPONENTS /* Components */,
+				GRP_VIEWS_EXAMS /* Exams */,
+				GRP_VIEWS_CAL /* Calendar */,
+				F017 /* MainTabView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		GRP_VIEWS_CAL /* Calendar */ = {
+			isa = PBXGroup;
+			children = (
+				E23C1C742FBB994600F99A34 /* Eventformview.swift */,
+				F014 /* CalendarDayView.swift */,
+				F015 /* CalendarMonthView.swift */,
+				F016 /* CalendarTabView.swift */,
+			);
+			path = Calendar;
+			sourceTree = "<group>";
+		};
+		GRP_VIEWS_COMPONENTS /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				F010 /* ProgressRing.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		GRP_VIEWS_EXAMS /* Exams */ = {
+			isa = PBXGroup;
+			children = (
+				F011 /* ExamDetailView.swift */,
+				F012 /* ExamFormView.swift */,
+				F013 /* ExamsTabView.swift */,
+			);
+			path = Exams;
+			sourceTree = "<group>";
+		};
+		GRP_VM /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				F006 /* AppStore.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		TARGET_MAIN /* StudyPlanner */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = XCBL_TARGET /* Build configuration list for PBXNativeTarget "StudyPlanner" */;
+			buildPhases = (
+				PH_SRC /* Sources */,
+				PH_FW /* Frameworks */,
+				PH_RES /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = StudyPlanner;
+			productName = StudyPlanner;
+			productReference = FAPP /* StudyPlanner.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		PROJ_ROOT /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1540;
+				LastUpgradeCheck = 2650;
+				TargetAttributes = {
+					TARGET_MAIN = {
+						CreatedOnToolsVersion = 15.4;
+					};
+				};
+			};
+			buildConfigurationList = XCBL_PROJ /* Build configuration list for PBXProject "StudyPlanner" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = GRP_ROOT;
+			productRefGroup = GRP_PRODUCTS /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				TARGET_MAIN /* StudyPlanner */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		PH_RES /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A018 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		PH_SRC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A001 /* StudyPlannerApp.swift in Sources */,
+				A002 /* Exam.swift in Sources */,
+				A003 /* StudyLog.swift in Sources */,
+				A004 /* ExamRepository.swift in Sources */,
+				A005 /* LocalExamRepository.swift in Sources */,
+				A006 /* AppStore.swift in Sources */,
+				A007 /* DateHelpers.swift in Sources */,
+				E23C1C772FBCE50700F99A34 /* Studyscheduler.swift in Sources */,
+				E23C1C752FBB994F00F99A34 /* Eventformview.swift in Sources */,
+				A008 /* StudyPlanCalculator.swift in Sources */,
+				E2D707012FC04E810047E22F /* Previewrepository.swift in Sources */,
+				A009 /* Colors.swift in Sources */,
+				A010 /* ProgressRing.swift in Sources */,
+				A011 /* ExamDetailView.swift in Sources */,
+				A012 /* ExamFormView.swift in Sources */,
+				A013 /* ExamsTabView.swift in Sources */,
+				A014 /* CalendarDayView.swift in Sources */,
+				E27825912FC03B390074EFB1 /* Keyboarddismiss.swift in Sources */,
+				A015 /* CalendarMonthView.swift in Sources */,
+				E23C1C732FBB991300F99A34 /* UserEvent.swift in Sources */,
+				A016 /* CalendarTabView.swift in Sources */,
+				A017 /* MainTabView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		BC_PROJ_DEBUG /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		BC_PROJ_RELEASE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		BC_TARGET_DEBUG /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"StudyPlanner/Preview Content\"";
+				DEVELOPMENT_TEAM = B7CZ4JVD42;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = StudentCal;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.studentcal.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		BC_TARGET_RELEASE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"StudyPlanner/Preview Content\"";
+				DEVELOPMENT_TEAM = B7CZ4JVD42;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = StudentCal;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.studentcal.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		XCBL_PROJ /* Build configuration list for PBXProject "StudyPlanner" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BC_PROJ_DEBUG /* Debug */,
+				BC_PROJ_RELEASE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		XCBL_TARGET /* Build configuration list for PBXNativeTarget "StudyPlanner" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BC_TARGET_DEBUG /* Debug */,
+				BC_TARGET_RELEASE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = PROJ_ROOT /* Project object */;
+}
