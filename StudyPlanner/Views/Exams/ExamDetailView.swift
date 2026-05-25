@@ -418,6 +418,14 @@ struct ExamDetailView: View {
                         .focused($inputFocused)
                         .font(.system(size: 17))
                         .onSubmit { submitLog(for: exam) }
+                        .onChange(of: inputFocused) { _, focused in
+                            guard !focused else { return }
+                            // Restore the last logged value if the field was cleared without submitting.
+                            if logInput.trimmingCharacters(in: .whitespaces).isEmpty,
+                               let logged = store.loggedAmount(examID: exam.id, on: browsingDate) {
+                                logInput = formatted(logged)
+                            }
+                        }
                     Text(exam.unit.unitNoun)
                         .font(.system(size: 14))
                         .foregroundStyle(Color(.tertiaryLabel))
@@ -433,7 +441,7 @@ struct ExamDetailView: View {
 
                 Button { submitLog(for: exam) } label: {
                     ZStack {
-                        if showLoggedConfirmation {
+                        if showLoggedConfirmation || inputIsUnchanged {
                             Image(systemName: "checkmark")
                                 .font(.system(size: 16, weight: .bold))
                                 .foregroundStyle(.white)
@@ -448,11 +456,16 @@ struct ExamDetailView: View {
                     .frame(width: 48, height: 48)
                     .background(
                         RoundedRectangle(cornerRadius: 12)
-                            .fill(inputIsValid ? glowColor : Color(.systemGray4))
+                            .fill(
+                                inputIsUnchanged ? Color.examGreen :
+                                inputIsValid     ? glowColor       :
+                                                   Color(.systemGray4)
+                            )
                     )
                     .animation(.easeOut(duration: 0.15), value: inputIsValid)
+                    .animation(.easeOut(duration: 0.15), value: inputIsUnchanged)
                 }
-                .disabled(!inputIsValid)
+                .disabled(!inputIsValid || inputIsUnchanged)
             }
 
             // "Log planned" shortcut
@@ -487,6 +500,7 @@ struct ExamDetailView: View {
     // MARK: - Date label
 
     private func dateLabel(date: Date, isToday: Bool) -> some View {
+        // Use .fixedSize() so the hit target is only the text itself, not the full-width row.
         Button {
             UIImpactFeedbackGenerator(style: .light).impactOccurred()
             showDatePicker = true
@@ -500,15 +514,15 @@ struct ExamDetailView: View {
                 HStack(spacing: 5) {
                     Text(DateFormatters.dayMonth.string(from: date))
                         .font(.system(size: 18, weight: .bold, design: .rounded))
-                    Image(systemName: "chevron.down")
+                    Image(systemName: "calendar")
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundStyle(Color.appAccent)
                 }
             }
-            .frame(maxWidth: .infinity)
-            .contentShape(Rectangle())
+            .fixedSize()
         }
         .buttonStyle(.plain)
+        .frame(maxWidth: .infinity)
     }
 
     // MARK: - Subviews
@@ -561,8 +575,10 @@ struct ExamDetailView: View {
     private func prefillLogInput(for exam: Exam) {
         if let logged = store.loggedAmount(examID: exam.id, on: browsingDate) {
             logInput = formatted(logged)
-        } else {
+        } else if Calendar.current.isDate(browsingDate, inSameDayAs: today) {
             logInput = ""
+        } else {
+            logInput = "0"
         }
     }
 
@@ -578,6 +594,14 @@ struct ExamDetailView: View {
                               .replacingOccurrences(of: ",", with: ".")
         guard !cleaned.isEmpty, let value = Double(cleaned), value >= 0, value <= 24 else { return nil }
         return value
+    }
+
+    // True when the typed value matches what's already saved — no point re-submitting.
+    private var inputIsUnchanged: Bool {
+        guard let exam = store.focusedExam,
+              let logged = store.loggedAmount(examID: exam.id, on: browsingDate),
+              let parsed = parsedAmount else { return false }
+        return abs(parsed - logged) < 0.001
     }
 
     private func submitLog(for exam: Exam) {
