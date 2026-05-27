@@ -16,11 +16,14 @@ struct ExamDetailView: View {
     @State private var showDatePicker   = false
     @FocusState private var inputFocused: Bool
 
+    // ── Overflow chip state ──────────────────────────────────────────────────
+    @State private var tipTitle: String?    = nil
+    @State private var tipMessage: String?  = nil
+
     // ── Day swipe state ───────────────────────────────────────────────────
     @State private var dayOffset:     CGFloat = 0
     @State private var peekDate:      Date?   = nil
     @State private var dragDirection: CGFloat = 1
-    @State private var logOffset:     CGFloat = 0   // independent offset for the log section
 
     private let commitThreshold: CGFloat = kScreenWidth * 0.30
     private var today: Date { Date().startOfDay }
@@ -38,11 +41,12 @@ struct ExamDetailView: View {
                     }
             }
         }
-        .onTapGesture {
-            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder),
-                                            to: nil, from: nil, for: nil)
-        }
-        .scrollDisabled(true)
+        .simultaneousGesture(
+            TapGesture().onEnded {
+                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder),
+                                                to: nil, from: nil, for: nil)
+            }
+        )
         .navigationTitle(store.focusedExam?.name ?? "Exam")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -72,6 +76,14 @@ struct ExamDetailView: View {
                 )
             }
         }
+        .alert(tipTitle ?? "", isPresented: Binding(
+            get: { tipTitle != nil },
+            set: { if !$0 { tipTitle = nil; tipMessage = nil } }
+        )) {
+            Button("Got it", role: .cancel) { tipTitle = nil; tipMessage = nil }
+        } message: {
+            Text(tipMessage ?? "")
+        }
     }
 
     // MARK: - Content
@@ -93,6 +105,12 @@ struct ExamDetailView: View {
                 hero(exam: exam, progress: progress, overflow: overflow,
                      isComplete: isComplete, glowColor: glowColor, geo: geo)
 
+                // ── Overflow banner — above the day carousel ──────────
+                if overflow {
+                    overflowBanner(glowColor: glowColor)
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                }
+
                 // ── Day carousel ──────────────────────────────────────────
                 dayCarousel(earliest: earliest, isBrowsingToday: isBrowsingToday,
                             isAtEarliest: isAtEarliest, glowColor: glowColor, geo: geo)
@@ -102,13 +120,9 @@ struct ExamDetailView: View {
                 // ── Bottom area — scrollable so everything always fits ─────
                 ScrollView {
                     VStack(spacing: 0) {
-                        if overflow {
-                            overflowBanner(glowColor: glowColor)
-                                .transition(.opacity.combined(with: .move(edge: .top)))
-                        }
                         if !isComplete {
                             logSection(exam: exam, isBrowsingToday: isBrowsingToday, glowColor: glowColor)
-                                .offset(x: logOffset)
+                                
                         } else {
                             CompletionSection(exam: exam, accentColor: glowColor)
                         }
@@ -116,6 +130,7 @@ struct ExamDetailView: View {
                 }
                 .frame(maxHeight: .infinity)
                 .clipped()
+                .scrollDisabled(true)
                 .simultaneousGesture(
                     DragGesture(minimumDistance: 15, coordinateSpace: .local)
                         .onChanged { value in
@@ -133,9 +148,7 @@ struct ExamDetailView: View {
                                     dragDirection = goingBack ? -1 : 1
                                 }
                             }
-                            // Move both carousel label and log section together
                             dayOffset = tx
-                            logOffset = tx
                         }
                         .onEnded { value in
                             let h = abs(value.translation.width)
@@ -145,12 +158,10 @@ struct ExamDetailView: View {
                                 let target: CGFloat = value.translation.width < 0 ? -kScreenWidth : kScreenWidth
                                 withAnimation(.interpolatingSpring(stiffness: 300, damping: 35)) {
                                     dayOffset = target
-                                    logOffset = target
                                 }
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.27) {
                                     browsingDate = next
                                     dayOffset = 0
-                                    logOffset = 0
                                     peekDate = nil
                                 }
                             } else {
@@ -159,7 +170,6 @@ struct ExamDetailView: View {
                                 }
                                 withAnimation(.interpolatingSpring(stiffness: 300, damping: 35)) {
                                     dayOffset = 0
-                                    logOffset = 0
                                 }
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { peekDate = nil }
                             }
@@ -312,41 +322,52 @@ struct ExamDetailView: View {
 
     @ViewBuilder
     private func overflowBanner(glowColor: Color) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 6) {
-                Image(systemName: "exclamationmark.triangle.fill")
-                    .font(.system(size: 11))
-                    .foregroundStyle(Color.red)
-                Text("Not enough time — try one of these:")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(Color.red)
-            }
-            .padding(.horizontal, 20)
-            .padding(.top, 14)
+        HorizontalScroll {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 6) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(size: 11))
+                        .foregroundStyle(Color.red)
+                    Text("Not enough time — try one of these:")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(Color.red)
+                        .fixedSize(horizontal: true, vertical: false)
+                }
 
-            ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 10) {
+                    // Buttons 1 & 2: open edit sheet, no arrow
                     suggestionChip(icon: "clock.arrow.2.circlepath",
-                                   label: "Extend hours",
+                                   label: "Extend interval",
+                                   showArrow: false,
                                    action: { isEditing = true })
                     suggestionChip(icon: "calendar.badge.plus",
                                    label: "Move exam date",
+                                   showArrow: false,
                                    action: { isEditing = true })
+                    // Buttons 3 & 4: show tip popup
                     suggestionChip(icon: "square.and.pencil",
-                                   label: "Log more today",
-                                   action: nil)
+                                   label: "Log more hours",
+                                   showArrow: false,
+                                   action: {
+                                       tipTitle   = "Log more hours"
+                                       tipMessage = "Try to squeeze in extra study time today — even 30 minutes helps. Open a past day in the carousel and log the actual hours you spent. Every extra hour logged reduces the daily target going forward."
+                                   })
                     suggestionChip(icon: "xmark.circle",
                                    label: "Free calendar",
-                                   action: nil)
+                                   showArrow: false,
+                                   action: {
+                                       tipTitle   = "Free up your calendar"
+                                       tipMessage = "Go to the Calendar tab and remove or shorten any events that overlap your study slots. Fewer conflicts means the planner can fit more study blocks into your day, bringing the daily target back to a manageable level."
+                                   })
                 }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 12)
             }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 14)
         }
         .background(Color.red.opacity(0.04))
     }
 
-    private func suggestionChip(icon: String, label: String, action: (() -> Void)?) -> some View {
+    private func suggestionChip(icon: String, label: String, showArrow: Bool, action: (() -> Void)?) -> some View {
         let chip = HStack(spacing: 6) {
             Image(systemName: icon)
                 .font(.system(size: 12, weight: .semibold))
@@ -354,7 +375,7 @@ struct ExamDetailView: View {
             Text(label)
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(.primary)
-            if action != nil {
+            if showArrow {
                 Image(systemName: "chevron.right")
                     .font(.system(size: 10, weight: .semibold))
                     .foregroundStyle(Color.red.opacity(0.5))
@@ -625,6 +646,67 @@ struct ExamDetailView: View {
             return DateFormatters.dayMonth.string(from: date)
         }
         return "—"
+    }
+}
+
+// MARK: - UIKit horizontal scroll wrapper
+
+private struct HorizontalScroll<Content: View>: UIViewRepresentable {
+    let content: Content
+
+    init(@ViewBuilder content: () -> Content) {
+        self.content = content()
+    }
+
+    func makeUIView(context: Context) -> UIScrollView {
+        let scrollView = UIScrollView()
+        scrollView.showsHorizontalScrollIndicator = false
+        scrollView.showsVerticalScrollIndicator = false
+        scrollView.alwaysBounceHorizontal = true
+        scrollView.alwaysBounceVertical = false
+        scrollView.backgroundColor = .clear
+        scrollView.contentInsetAdjustmentBehavior = .never
+
+        let host = UIHostingController(rootView: content)
+        host.view.backgroundColor = .clear
+        host.view.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.addSubview(host.view)
+
+        // Pin to content layout guide so the host view drives the scrollable content size,
+        // and pin its height to the scroll view's frame so vertical layout matches the parent.
+        NSLayoutConstraint.activate([
+            host.view.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
+            host.view.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
+            host.view.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
+            host.view.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
+            host.view.heightAnchor.constraint(equalTo: scrollView.frameLayoutGuide.heightAnchor)
+        ])
+
+        context.coordinator.host = host
+        return scrollView
+    }
+
+    func updateUIView(_ uiView: UIScrollView, context: Context) {
+        context.coordinator.host?.rootView = content
+        context.coordinator.host?.view.invalidateIntrinsicContentSize()
+    }
+
+    @available(iOS 16.0, *)
+    func sizeThatFits(_ proposal: ProposedViewSize, uiView: UIScrollView, context: Context) -> CGSize? {
+        guard let host = context.coordinator.host else { return nil }
+        // Ask the hosted SwiftUI content for its natural size with unbounded width
+        let fittingSize = host.sizeThatFits(in: CGSize(width: CGFloat.greatestFiniteMagnitude,
+                                                       height: CGFloat.greatestFiniteMagnitude))
+        // Width: take whatever the parent proposes (so it fills the row)
+        // Height: take the natural content height
+        let width = proposal.width ?? fittingSize.width
+        return CGSize(width: width, height: fittingSize.height)
+    }
+
+    func makeCoordinator() -> Coordinator { Coordinator() }
+
+    final class Coordinator {
+        var host: UIHostingController<Content>?
     }
 }
 
