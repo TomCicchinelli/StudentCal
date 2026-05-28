@@ -18,9 +18,6 @@ extension Color {
     static let appAccent    = Color(red: indigoR, green: indigoG, blue: indigoB)
     static let appAccentSoft = Color(red: indigoR, green: indigoG, blue: indigoB).opacity(0.10)
 
-    /// Legacy alias kept so any remaining call-sites still compile.
-    static let primaryBlue  = Color.appAccent
-
     // MARK: - Progress ring
     static let examGreen = Color(red: 0.133, green: 0.773, blue: 0.408)
 

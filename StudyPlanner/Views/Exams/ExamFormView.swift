@@ -11,8 +11,15 @@ struct ExamFormView: View {
         case edit(Exam)
     }
 
+    /// Which field the overflow chips want to draw attention to on open.
+    enum HighlightField {
+        case none, examDate, studyInterval
+    }
+
     let mode: Mode
     var canCancel: Bool = true
+    var highlightField: HighlightField = .none
+    var triggerPulse: Binding<Bool> = .constant(false)
 
     @Environment(AppStore.self) private var store
     @Environment(\.dismiss) private var dismiss
@@ -29,6 +36,7 @@ struct ExamFormView: View {
     @State private var showIntervalInfo   = false
     @State private var showCustomInterval = false
     @State private var showValidationErrors = false
+    @State private var highlightPulse     = false   // drives the attention animation
 
     private var isEditing: Bool { if case .edit = mode { return true }; return false }
     private var editingExamID: UUID? { if case let .edit(e) = mode { return e.id }; return nil }
@@ -44,7 +52,7 @@ struct ExamFormView: View {
     }
 
     /// Human-readable list of what's missing.
-    var validationErrors: [String] {
+    private var validationErrors: [String] {
         var errors: [String] = []
         if name.trimmingCharacters(in: .whitespaces).isEmpty {
             errors.append("Exam name is required")
@@ -105,6 +113,13 @@ struct ExamFormView: View {
                                     .datePickerStyle(.compact)
                                     .tint(Color.appAccent)
                             }
+                            .padding(highlightField == .examDate ? 8 : 0)
+                            .background(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(highlightField == .examDate && highlightPulse
+                                          ? Color.appAccent.opacity(0.12) : Color.clear)
+                            )
+                            .animation(.easeInOut(duration: 0.5), value: highlightPulse)
 
                             Divider().opacity(0.5)
 
@@ -116,10 +131,18 @@ struct ExamFormView: View {
                                             .font(.system(size: 13))
                                             .foregroundStyle(Color.appAccent.opacity(0.7))
                                     }
+                                    .buttonStyle(.plain)
                                 }
                                 Spacer()
                                 IntervalPicker(interval: $interval, showCustomInterval: $showCustomInterval)
                             }
+                            .padding(highlightField == .studyInterval ? 8 : 0)
+                            .background(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(highlightField == .studyInterval && highlightPulse
+                                          ? Color.appAccent.opacity(0.12) : Color.clear)
+                            )
+                            .animation(.easeInOut(duration: 0.5), value: highlightPulse)
 
                             if showCustomInterval {
                                 HStack(spacing: 16) {
@@ -220,6 +243,7 @@ struct ExamFormView: View {
                                     )
                                     .foregroundStyle(.red)
                             }
+                            .buttonStyle(.plain)
                             Button {
                                 if isValid { save() }
                                 else { withAnimation { showValidationErrors = true } }
@@ -234,6 +258,7 @@ struct ExamFormView: View {
                                     )
                                     .foregroundStyle(.white)
                             }
+                            .buttonStyle(.plain)
                         }
                     } else {
                         Button {
@@ -250,6 +275,7 @@ struct ExamFormView: View {
                                 )
                                 .foregroundStyle(.white)
                         }
+                        .buttonStyle(.plain)
                     }
 
                     Spacer(minLength: 8)
@@ -270,6 +296,19 @@ struct ExamFormView: View {
                 }
             }
             .onAppear(perform: prefill)
+            .onChange(of: triggerPulse.wrappedValue) { _, fired in
+                guard fired, highlightField != .none else { return }
+                withAnimation(.easeInOut(duration: 0.45)) { highlightPulse = true }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+                    withAnimation(.easeInOut(duration: 0.45)) { highlightPulse = false }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                        withAnimation(.easeInOut(duration: 0.45)) { highlightPulse = true }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+                            withAnimation(.easeInOut(duration: 0.45)) { highlightPulse = false }
+                        }
+                    }
+                }
+            }
             .alert("Delete exam?", isPresented: $showDeleteConfirm) {
                 Button("Delete", role: .destructive) {
                     if let id = editingExamID { store.delete(examID: id) }

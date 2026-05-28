@@ -10,15 +10,18 @@ private let kScreenWidth: CGFloat = UIScreen.main.bounds.width
 struct ExamDetailView: View {
     @Environment(AppStore.self) private var store
     @State private var isEditing        = false
+    @State private var editingHighlight: ExamFormView.HighlightField = .none
+    @State private var triggerPulse     = false
     @State private var logInput: String = ""
     @State private var browsingDate: Date = Date()
     @State private var showLoggedConfirmation = false
     @State private var showDatePicker   = false
+    @State private var viewWidth: CGFloat = UIScreen.main.bounds.width
     @FocusState private var inputFocused: Bool
 
     // ── Overflow chip state ──────────────────────────────────────────────────
-    @State private var tipTitle: String?    = nil
-    @State private var tipMessage: String?  = nil
+    @State private var showFreeCalendarTip = false
+    @State private var showLogMoreSheet    = false
 
     // ── Day swipe state ───────────────────────────────────────────────────
     @State private var dayOffset:     CGFloat = 0
@@ -37,6 +40,10 @@ struct ExamDetailView: View {
                         prefillLogInput(for: exam)
                     }
                     .onChange(of: browsingDate) { _, _ in
+                        prefillLogInput(for: exam)
+                    }
+                    .onChange(of: store.focusedExamID) { _, _ in
+                        browsingDate = today
                         prefillLogInput(for: exam)
                     }
             }
@@ -58,14 +65,20 @@ struct ExamDetailView: View {
                     Text("Edit")
                         .font(.system(size: 15, weight: .medium))
                         .foregroundStyle(Color.appAccent)
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 6)
-                        .background(Color.appAccentSoft, in: Capsule())
                 }
             }
         }
-        .sheet(isPresented: $isEditing) {
-            if let exam = store.focusedExam { ExamFormView(mode: .edit(exam)) }
+        .sheet(isPresented: $isEditing, onDismiss: { editingHighlight = .none; triggerPulse = false }) {
+            if let exam = store.focusedExam {
+                ExamFormView(mode: .edit(exam), highlightField: editingHighlight, triggerPulse: $triggerPulse)
+            }
+        }
+        .onChange(of: isEditing) { _, open in
+            guard open, editingHighlight != .none else { return }
+            // Sheet animation takes ~0.5s. Fire pulse after it settles.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.65) {
+                triggerPulse = true
+            }
         }
         .sheet(isPresented: $showDatePicker) {
             if let exam = store.focusedExam {
@@ -76,13 +89,13 @@ struct ExamDetailView: View {
                 )
             }
         }
-        .alert(tipTitle ?? "", isPresented: Binding(
-            get: { tipTitle != nil },
-            set: { if !$0 { tipTitle = nil; tipMessage = nil } }
-        )) {
-            Button("Got it", role: .cancel) { tipTitle = nil; tipMessage = nil }
+        .sheet(isPresented: $showLogMoreSheet) {
+            LogMoreSheet()
+        }
+        .alert("Free up your calendar", isPresented: $showFreeCalendarTip) {
+            Button("Got it", role: .cancel) {}
         } message: {
-            Text(tipMessage ?? "")
+            Text("Study hours are planned around your existing events — they'll never overlap. Remove or shorten events inside your study interval to open up more slots and bring your daily target back on track.")
         }
     }
 
@@ -99,6 +112,7 @@ struct ExamDetailView: View {
         let glowColor       = overflow ? Color.red : isComplete ? Color.examGreen : Color.appAccent
 
         GeometryReader { geo in
+            let _ = Task { @MainActor in viewWidth = geo.size.width }
             VStack(spacing: 0) {
 
                 // ── Hero — always compact ─────────────────────────────────
@@ -106,6 +120,8 @@ struct ExamDetailView: View {
                      isComplete: isComplete, glowColor: glowColor, geo: geo)
 
                 // ── Overflow banner — above the day carousel ──────────
+                // NOTE: no swipe gesture here — the banner has its own
+                // horizontal UIScrollView and must not trigger day navigation.
                 if overflow {
                     overflowBanner(glowColor: glowColor)
                         .transition(.opacity.combined(with: .move(edge: .top)))
@@ -114,6 +130,9 @@ struct ExamDetailView: View {
                 // ── Day carousel ──────────────────────────────────────────
                 dayCarousel(earliest: earliest, isBrowsingToday: isBrowsingToday,
                             isAtEarliest: isAtEarliest, glowColor: glowColor, geo: geo)
+                    .simultaneousGesture(daySwipeGesture(earliest: earliest,
+                                                         isBrowsingToday: isBrowsingToday,
+                                                         isAtEarliest: isAtEarliest))
 
                 Divider().opacity(isComplete ? 0 : 0.4)
 
@@ -131,50 +150,9 @@ struct ExamDetailView: View {
                 .frame(maxHeight: .infinity)
                 .clipped()
                 .scrollDisabled(true)
-                .simultaneousGesture(
-                    DragGesture(minimumDistance: 15, coordinateSpace: .local)
-                        .onChanged { value in
-                            let h = abs(value.translation.width)
-                            let v = abs(value.translation.height)
-                            guard h > v * 2 else { return }
-                            let tx = value.translation.width
-                            if peekDate == nil {
-                                let goingBack = tx > 0
-                                if goingBack && isAtEarliest     { return }
-                                if !goingBack && isBrowsingToday { return }
-                                let delta = goingBack ? -1 : 1
-                                if let candidate = Calendar.current.date(byAdding: .day, value: delta, to: browsingDate) {
-                                    peekDate      = max(earliest.startOfDay, min(today, candidate.startOfDay))
-                                    dragDirection = goingBack ? -1 : 1
-                                }
-                            }
-                            dayOffset = tx
-                        }
-                        .onEnded { value in
-                            let h = abs(value.translation.width)
-                            let v = abs(value.translation.height)
-                            if h > v * 2, h > commitThreshold, let next = peekDate {
-                                UISelectionFeedbackGenerator().selectionChanged()
-                                let target: CGFloat = value.translation.width < 0 ? -kScreenWidth : kScreenWidth
-                                withAnimation(.interpolatingSpring(stiffness: 300, damping: 35)) {
-                                    dayOffset = target
-                                }
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.27) {
-                                    browsingDate = next
-                                    dayOffset = 0
-                                    peekDate = nil
-                                }
-                            } else {
-                                if peekDate != nil {
-                                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                                }
-                                withAnimation(.interpolatingSpring(stiffness: 300, damping: 35)) {
-                                    dayOffset = 0
-                                }
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { peekDate = nil }
-                            }
-                        }
-                )
+                .simultaneousGesture(daySwipeGesture(earliest: earliest,
+                                                     isBrowsingToday: isBrowsingToday,
+                                                     isAtEarliest: isAtEarliest))
             }
         }
     }
@@ -277,45 +255,48 @@ struct ExamDetailView: View {
         }
         .frame(height: geo.size.height * 0.09)
         .background(glowColor.opacity(0.04))
-        .gesture(
-            DragGesture(minimumDistance: 15, coordinateSpace: .local)
-                .onChanged { value in
-                    let h = abs(value.translation.width)
-                    let v = abs(value.translation.height)
-                    guard h > v * 1.5 else { return }
-                    let tx = value.translation.width
-                    if peekDate == nil {
-                        let goingBack = tx > 0
-                        if goingBack && isAtEarliest     { return }
-                        if !goingBack && isBrowsingToday { return }
-                        let delta = goingBack ? -1 : 1
-                        if let candidate = Calendar.current.date(byAdding: .day, value: delta, to: browsingDate) {
-                            peekDate      = max(earliest.startOfDay, min(today, candidate.startOfDay))
-                            dragDirection = goingBack ? -1 : 1
-                        }
-                    }
-                    dayOffset = tx
-                }
-                .onEnded { value in
-                    let h = abs(value.translation.width)
-                    let v = abs(value.translation.height)
-                    if h > v * 1.5, h > commitThreshold, let next = peekDate {
-                        UISelectionFeedbackGenerator().selectionChanged()
-                        withAnimation(.interpolatingSpring(stiffness: 300, damping: 35)) {
-                            dayOffset = value.translation.width < 0 ? -kScreenWidth : kScreenWidth
-                        }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.27) {
-                            browsingDate = next; dayOffset = 0; peekDate = nil
-                        }
-                    } else {
-                        if peekDate != nil {
-                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                        }
-                        withAnimation(.interpolatingSpring(stiffness: 300, damping: 35)) { dayOffset = 0 }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { peekDate = nil }
+    }
+
+    // MARK: - Day swipe gesture (single instance, applied at top level)
+
+    private func daySwipeGesture(earliest: Date, isBrowsingToday: Bool, isAtEarliest: Bool) -> some Gesture {
+        DragGesture(minimumDistance: 15, coordinateSpace: .local)
+            .onChanged { value in
+                let h = abs(value.translation.width)
+                let v = abs(value.translation.height)
+                guard h > v * 1.5 else { return }
+                let tx = value.translation.width
+                if peekDate == nil {
+                    let goingBack = tx > 0
+                    if goingBack && isAtEarliest     { return }
+                    if !goingBack && isBrowsingToday { return }
+                    let delta = goingBack ? -1 : 1
+                    if let candidate = Calendar.current.date(byAdding: .day, value: delta, to: browsingDate) {
+                        peekDate      = max(earliest.startOfDay, min(today, candidate.startOfDay))
+                        dragDirection = goingBack ? -1 : 1
                     }
                 }
-        )
+                dayOffset = tx
+            }
+            .onEnded { value in
+                let h = abs(value.translation.width)
+                let v = abs(value.translation.height)
+                if h > v * 1.5, h > commitThreshold, let next = peekDate {
+                    UISelectionFeedbackGenerator().selectionChanged()
+                    withAnimation(.interpolatingSpring(stiffness: 300, damping: 35)) {
+                        dayOffset = value.translation.width < 0 ? -kScreenWidth : kScreenWidth
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.27) {
+                        browsingDate = next; dayOffset = 0; peekDate = nil
+                    }
+                } else {
+                    if peekDate != nil {
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    }
+                    withAnimation(.interpolatingSpring(stiffness: 300, damping: 35)) { dayOffset = 0 }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { peekDate = nil }
+                }
+            }
     }
 
     // MARK: - Overflow banner (compact, horizontally scrolling chips)
@@ -335,30 +316,32 @@ struct ExamDetailView: View {
                 }
 
                 HStack(spacing: 10) {
-                    // Buttons 1 & 2: open edit sheet, no arrow
+                    // Button 1: open edit sheet, highlight the study interval field
                     suggestionChip(icon: "clock.arrow.2.circlepath",
                                    label: "Extend interval",
                                    showArrow: false,
-                                   action: { isEditing = true })
+                                   action: {
+                                       editingHighlight = .studyInterval
+                                       isEditing = true
+                                   })
+                    // Button 2: open edit sheet, highlight the exam date field
                     suggestionChip(icon: "calendar.badge.plus",
                                    label: "Move exam date",
                                    showArrow: false,
-                                   action: { isEditing = true })
-                    // Buttons 3 & 4: show tip popup
+                                   action: {
+                                       editingHighlight = .examDate
+                                       isEditing = true
+                                   })
+                    // Button 3: full sheet explaining how to log extra hours
                     suggestionChip(icon: "square.and.pencil",
                                    label: "Log more hours",
                                    showArrow: false,
-                                   action: {
-                                       tipTitle   = "Log more hours"
-                                       tipMessage = "Try to squeeze in extra study time today — even 30 minutes helps. Open a past day in the carousel and log the actual hours you spent. Every extra hour logged reduces the daily target going forward."
-                                   })
+                                   action: { showLogMoreSheet = true })
+                    // Button 4: alert tip about freeing calendar
                     suggestionChip(icon: "xmark.circle",
                                    label: "Free calendar",
                                    showArrow: false,
-                                   action: {
-                                       tipTitle   = "Free up your calendar"
-                                       tipMessage = "Go to the Calendar tab and remove or shorten any events that overlap your study slots. Fewer conflicts means the planner can fit more study blocks into your day, bringing the daily target back to a manageable level."
-                                   })
+                                   action: { showFreeCalendarTip = true })
                 }
             }
             .padding(.horizontal, 20)
@@ -367,6 +350,7 @@ struct ExamDetailView: View {
         .background(Color.red.opacity(0.04))
     }
 
+    @ViewBuilder
     private func suggestionChip(icon: String, label: String, showArrow: Bool, action: (() -> Void)?) -> some View {
         let chip = HStack(spacing: 6) {
             Image(systemName: icon)
@@ -390,12 +374,13 @@ struct ExamDetailView: View {
         )
 
         if let action {
-            return AnyView(Button {
+            Button {
                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 action()
-            } label: { chip }.buttonStyle(.plain))
+            } label: { chip }
+            .buttonStyle(.plain)
         } else {
-            return AnyView(chip)
+            chip
         }
     }
 
@@ -486,6 +471,7 @@ struct ExamDetailView: View {
                     .animation(.easeOut(duration: 0.15), value: inputIsValid)
                     .animation(.easeOut(duration: 0.15), value: inputIsUnchanged)
                 }
+                .buttonStyle(.plain)
                 .disabled(!inputIsValid || inputIsUnchanged)
             }
 
@@ -522,28 +508,34 @@ struct ExamDetailView: View {
 
     private func dateLabel(date: Date, isToday: Bool) -> some View {
         // Use .fixedSize() so the hit target is only the text itself, not the full-width row.
-        Button {
-            UIImpactFeedbackGenerator(style: .light).impactOccurred()
-            showDatePicker = true
-        } label: {
-            VStack(spacing: 2) {
-                Text(isToday ? "Today" : "Past day")
-                    .font(.system(size: 10, weight: .semibold))
-                    .foregroundStyle(.secondary)
-                    .textCase(.uppercase)
-                    .kerning(0.6)
-                HStack(spacing: 5) {
-                    Text(DateFormatters.dayMonth.string(from: date))
-                        .font(.system(size: 18, weight: .bold, design: .rounded))
-                    Image(systemName: "calendar")
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundStyle(Color.appAccent)
-                }
+        // The drag gesture takes priority — if the touch moves more than 8pt it's a swipe,
+        // not a tap, so the picker is not opened.
+        VStack(spacing: 2) {
+            Text(isToday ? "Today" : "Past day")
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundStyle(.secondary)
+                .textCase(.uppercase)
+                .kerning(0.6)
+            HStack(spacing: 5) {
+                Text(DateFormatters.dayMonth.string(from: date))
+                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                Image(systemName: "calendar")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(Color.appAccent)
             }
-            .fixedSize()
         }
-        .buttonStyle(.plain)
+        .fixedSize()
         .frame(maxWidth: .infinity)
+        .contentShape(Rectangle())
+        .gesture(
+            DragGesture(minimumDistance: 0)
+                .onEnded { value in
+                    let distance = sqrt(pow(value.translation.width, 2) + pow(value.translation.height, 2))
+                    guard distance < 8 else { return }   // it was a tap, not a swipe
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    showDatePicker = true
+                }
+        )
     }
 
     // MARK: - Subviews
@@ -575,7 +567,13 @@ struct ExamDetailView: View {
     // MARK: - Helpers
 
     private func creationDay(for exam: Exam) -> Date {
-        store.logsForExam(id: exam.id).map({ $0.date.startOfDay }).min() ?? today
+        // Use the earliest log date if any exist. Otherwise fall back to
+        // 30 days before today (or exam creation horizon) so the carousel
+        // isn't locked to a single day on a brand-new exam.
+        if let earliest = store.logsForExam(id: exam.id).map({ $0.date.startOfDay }).min() {
+            return earliest
+        }
+        return Calendar.current.date(byAdding: .day, value: -30, to: today) ?? today
     }
 
     private func stepDay(by delta: Int, earliest: Date) {
@@ -607,13 +605,18 @@ struct ExamDetailView: View {
         let cleaned = logInput.trimmingCharacters(in: .whitespaces)
                               .replacingOccurrences(of: ",", with: ".")
         guard !cleaned.isEmpty, let value = Double(cleaned) else { return false }
-        return value >= 0 && value <= 24
+        guard value >= 0 else { return false }
+        let cap: Double = store.focusedExam.map { $0.unit == .hours ? 24 : $0.totalAmount } ?? 24
+        return value <= cap
     }
 
     private var parsedAmount: Double? {
         let cleaned = logInput.trimmingCharacters(in: .whitespaces)
                               .replacingOccurrences(of: ",", with: ".")
-        guard !cleaned.isEmpty, let value = Double(cleaned), value >= 0, value <= 24 else { return nil }
+        guard !cleaned.isEmpty, let value = Double(cleaned), value >= 0 else { return nil }
+        // Cap at 24 for hours; for pages cap at the exam's total amount.
+        let cap: Double = store.focusedExam.map { $0.unit == .hours ? 24 : $0.totalAmount } ?? 24
+        guard value <= cap else { return nil }
         return value
     }
 
@@ -646,6 +649,103 @@ struct ExamDetailView: View {
             return DateFormatters.dayMonth.string(from: date)
         }
         return "—"
+    }
+}
+
+// MARK: - Log more hours sheet
+
+private struct LogMoreSheet: View {
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 28) {
+
+                    // ── Hero ─────────────────────────────────────────────
+                    VStack(alignment: .leading, spacing: 10) {
+                        HStack(spacing: 12) {
+                            ZStack {
+                                Circle()
+                                    .fill(Color.appAccent.opacity(0.10))
+                                    .frame(width: 52, height: 52)
+                                Image(systemName: "square.and.pencil")
+                                    .font(.system(size: 22, weight: .semibold))
+                                    .foregroundStyle(Color.appAccent)
+                            }
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("Log more hours")
+                                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                                Text("Study outside your interval to catch up")
+                                    .font(.system(size: 14))
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+
+                    // ── How it works ─────────────────────────────────────
+                    VStack(alignment: .leading, spacing: 16) {
+                        tipRow(
+                            icon: "clock.badge.plus",
+                            iconColor: Color.appAccent,
+                            title: "Study beyond your usual hours",
+                            body: "Your interval sets when the planner schedules blocks, but you're not limited to it. Every extra hour you put in — early mornings, evenings, weekends — counts."
+                        )
+                        Divider().opacity(0.5)
+                        tipRow(
+                            icon: "calendar.day.timeline.left",
+                            iconColor: Color.appAccent,
+                            title: "Log it on the right day",
+                            body: "Swipe back to the day you studied and enter what you actually covered. The planner will recalculate your remaining target immediately."
+                        )
+                        Divider().opacity(0.5)
+                        tipRow(
+                            icon: "chart.line.downtrend.xyaxis",
+                            iconColor: Color.examGreen,
+                            title: "Every session reduces the gap",
+                            body: "The more extra time you log over the next few days, the faster the daily target drops back to a manageable level."
+                        )
+                    }
+                    .padding(16)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color(.secondarySystemGroupedBackground))
+                    )
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 24)
+            }
+            .background(Color(.systemGroupedBackground))
+            .navigationTitle("Log more hours")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") { dismiss() }
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(Color.appAccent)
+                }
+            }
+        }
+        .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.visible)
+    }
+
+    private func tipRow(icon: String, iconColor: Color, title: String, body: String) -> some View {
+        HStack(alignment: .top, spacing: 14) {
+            Image(systemName: icon)
+                .font(.system(size: 18, weight: .medium))
+                .foregroundStyle(iconColor)
+                .frame(width: 28)
+                .padding(.top, 1)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.system(size: 15, weight: .semibold))
+                Text(body)
+                    .font(.system(size: 14))
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
     }
 }
 
@@ -718,6 +818,7 @@ private struct CompletionSection: View {
 
     @State private var appeared  = false
     @State private var showDots  = false
+    @State private var hasPlayed = false   // prevents replay on re-appear
 
     private let colors: [Color] = [.examGreen, .appAccent, .yellow, .orange, .pink, .teal]
 
@@ -794,6 +895,8 @@ private struct CompletionSection: View {
             .padding(.vertical, 40)
         }
         .onAppear {
+            guard !hasPlayed else { return }
+            hasPlayed = true
             withAnimation(.spring(response: 0.5, dampingFraction: 0.65).delay(0.05)) { appeared = true }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { showDots = true }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) {
@@ -812,7 +915,7 @@ private struct DatePickerSheet: View {
     let latest: Date
 
     @Environment(\.dismiss) private var dismiss
-    @State private var draft: Date = Date()
+    @State private var draft: Date = .distantPast   // overwritten in onAppear
 
     var body: some View {
         NavigationStack {

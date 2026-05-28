@@ -85,9 +85,9 @@ final class PreviewRepository: ExamRepository {
 
         for entry in logEntries {
             let date = daysAgo(entry.daysAgo)
-            // Skip weekends (Sunday = 1, Saturday = 7 in Calendar)
+            // Skip Sunday (the exam's studyDays doesn't include Sunday).
             let weekday = cal.component(.weekday, from: date)
-            if weekday == 1 { continue }   // skip Sunday
+            if weekday == 1 { continue }   // 1 = Sunday in Calendar
             inner.appendLog(StudyLog(
                 examID: examID,
                 date: date,

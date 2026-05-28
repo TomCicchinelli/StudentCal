@@ -45,13 +45,13 @@ enum Weekday: Int, Codable, CaseIterable, Identifiable {
 
     var shortLabel: String {
         switch self {
-        case .monday: return "M"
-        case .tuesday: return "T"
+        case .monday:    return "M"
+        case .tuesday:   return "Tu"
         case .wednesday: return "W"
-        case .thursday: return "T"
-        case .friday: return "F"
-        case .saturday: return "S"
-        case .sunday: return "S"
+        case .thursday:  return "Th"
+        case .friday:    return "F"
+        case .saturday:  return "Sa"
+        case .sunday:    return "Su"
         }
     }
 }

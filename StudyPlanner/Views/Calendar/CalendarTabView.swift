@@ -59,8 +59,6 @@ struct CalendarTabView: View {
                 Image(systemName: "plus")
                     .font(.system(size: 14, weight: .bold))
                     .foregroundStyle(Color.appAccent)
-                    .frame(width: 30, height: 30)
-                    .background(Circle().fill(Color.appAccentSoft))
             }
         }
     }

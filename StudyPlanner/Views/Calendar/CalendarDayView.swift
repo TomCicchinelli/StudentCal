@@ -30,7 +30,6 @@ private func resolveOverlaps(_ events: [UserEvent]) -> [LayoutEvent] {
             assignments.append((event, columnEnds.count - 1))
         }
     }
-    let totalColumns = columnEnds.count
     var result: [LayoutEvent] = []
     var groupStart = 0
     var groupMaxEnd: Date = sorted[0].endDate
@@ -54,7 +53,6 @@ private func resolveOverlaps(_ events: [UserEvent]) -> [LayoutEvent] {
         }
     }
     flush(upTo: assignments.count)
-    _ = totalColumns
     return result
 }
 
@@ -562,6 +560,7 @@ private struct EventEditSheet: View {
                             .background(RoundedRectangle(cornerRadius: 14).fill(Color.appAccent))
                             .foregroundStyle(.white)
                     }
+                    .buttonStyle(.plain)
                     Button(role: .destructive) {
                         Haptics.light.impactOccurred()
                         if isRepeating { showDeleteChoice = true }
@@ -573,6 +572,7 @@ private struct EventEditSheet: View {
                             .background(RoundedRectangle(cornerRadius: 14).stroke(Color.red.opacity(0.7), lineWidth: 1))
                             .foregroundStyle(.red)
                     }
+                    .buttonStyle(.plain)
                 }
                 .padding(.horizontal, 20).padding(.bottom, 32)
             }

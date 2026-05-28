@@ -20,14 +20,15 @@ struct EventFormView: View {
 
     @State private var title: String = ""
     @State private var startDate: Date = Date()
-    @State private var endDate: Date = Date().addingTimeInterval(7200)
+    @State private var endDate: Date = Date().addingTimeInterval(3600)
     @State private var repeatFrequency: RepeatFrequency = .never
     @State private var eventColor: EventColor = .preset(.red)
     @State private var notes: String = ""
 
-    @State private var showStartDatePicker = false
-    @State private var showStartTimePicker = false
-    @State private var showEndTimePicker   = false
+    /// Tracks the previous start day independently of onChange firing frequency,
+    /// preventing the end-date day-shift from applying twice in one gesture.
+    @State private var lastStartDay: Date = Calendar.current.startOfDay(for: Date())
+
     @State private var showColorPicker     = false
     @State private var showValidationErrors = false
 
@@ -37,7 +38,7 @@ struct EventFormView: View {
         !title.trimmingCharacters(in: .whitespaces).isEmpty && endDate > startDate
     }
 
-    var validationErrors: [String] {
+    private var validationErrors: [String] {
         var errors: [String] = []
         if title.trimmingCharacters(in: .whitespaces).isEmpty {
             errors.append("Event name is required")
@@ -54,7 +55,7 @@ struct EventFormView: View {
                 VStack(spacing: 16) {
 
                     // ── Name ──────────────────────────────────────────────
-                    card {
+                    card(invalid: showValidationErrors && title.trimmingCharacters(in: .whitespaces).isEmpty) {
                         VStack(alignment: .leading, spacing: 8) {
                             fieldLabel("Event name")
                             TextField("Enter event name", text: $title)
@@ -72,28 +73,33 @@ struct EventFormView: View {
                             HStack {
                                 fieldLabel("Start")
                                 Spacer()
-                                pill(text: startDate.formatted(date: .abbreviated, time: .omitted)) {
-                                    withAnimation(.easeInOut(duration: 0.2)) {
-                                        showStartDatePicker.toggle(); showStartTimePicker = false; showEndTimePicker = false
-                                    }
-                                }
-                                pill(text: startDate.formatted(date: .omitted, time: .shortened)) {
-                                    withAnimation(.easeInOut(duration: 0.2)) {
-                                        showStartTimePicker.toggle(); showStartDatePicker = false; showEndTimePicker = false
-                                    }
-                                }
-                            }
-                            if showStartDatePicker {
                                 DatePicker("", selection: $startDate, displayedComponents: .date)
-                                    .datePickerStyle(.graphical).tint(Color.appAccent)
-                                    .onChange(of: startDate) { old, new in endDate = new.addingTimeInterval(endDate.timeIntervalSince(old)) }
-                                    .transition(.opacity.combined(with: .move(edge: .top)))
-                            }
-                            if showStartTimePicker {
+                                    .labelsHidden()
+                                    .datePickerStyle(.compact)
+                                    .tint(Color.appAccent)
+                                    .onChange(of: startDate) { _, new in
+                                        // Use lastStartDay to guard against double-fires from
+                                        // the split date/time pickers.
+                                        let cal = Calendar.current
+                                        let newDay = cal.startOfDay(for: new)
+                                        guard newDay != lastStartDay else { return }
+                                        lastStartDay = newDay
+
+                                        // Transplant the end's time-of-day onto the new start date,
+                                        // so end lands on the same day as the new start (not +1).
+                                        let endComponents = cal.dateComponents([.hour, .minute], from: endDate)
+                                        if let relocated = cal.date(bySettingHour: endComponents.hour ?? 0,
+                                                                    minute: endComponents.minute ?? 0,
+                                                                    second: 0, of: newDay) {
+                                            // If end would be at or before new start, snap to start + 1h.
+                                            endDate = relocated > new ? relocated : new.addingTimeInterval(3600)
+                                        }
+                                    }
                                 DatePicker("", selection: $startDate, displayedComponents: .hourAndMinute)
-                                    .datePickerStyle(.wheel).labelsHidden().frame(maxWidth: .infinity).tint(Color.appAccent)
+                                    .labelsHidden()
+                                    .datePickerStyle(.compact)
+                                    .tint(Color.appAccent)
                                     .onChange(of: startDate) { _, new in if endDate <= new { endDate = new.addingTimeInterval(3600) } }
-                                    .transition(.opacity.combined(with: .move(edge: .top)))
                             }
 
                             Divider().opacity(0.5).padding(.vertical, 10)
@@ -101,23 +107,14 @@ struct EventFormView: View {
                             HStack {
                                 fieldLabel("End")
                                 Spacer()
-                                if !Calendar.current.isDate(startDate, inSameDayAs: endDate) {
-                                    pill(text: endDate.formatted(date: .abbreviated, time: .omitted)) {
-                                        withAnimation(.easeInOut(duration: 0.2)) {
-                                            showStartDatePicker.toggle(); showStartTimePicker = false; showEndTimePicker = false
-                                        }
-                                    }
-                                }
-                                pill(text: endDate.formatted(date: .omitted, time: .shortened)) {
-                                    withAnimation(.easeInOut(duration: 0.2)) {
-                                        showEndTimePicker.toggle(); showStartDatePicker = false; showStartTimePicker = false
-                                    }
-                                }
-                            }
-                            if showEndTimePicker {
+                                DatePicker("", selection: $endDate, displayedComponents: .date)
+                                    .labelsHidden()
+                                    .datePickerStyle(.compact)
+                                    .tint(Color.appAccent)
                                 DatePicker("", selection: $endDate, in: startDate.addingTimeInterval(60)..., displayedComponents: .hourAndMinute)
-                                    .datePickerStyle(.wheel).labelsHidden().frame(maxWidth: .infinity).tint(Color.appAccent)
-                                    .transition(.opacity.combined(with: .move(edge: .top)))
+                                    .labelsHidden()
+                                    .datePickerStyle(.compact)
+                                    .tint(Color.appAccent)
                             }
                         }
                         .padding(.vertical, 2)
@@ -225,8 +222,8 @@ struct EventFormView: View {
                 ToolbarItem(placement: .topBarLeading) {
                     Button { dismiss() } label: {
                         Image(systemName: "xmark")
-                            .font(.system(size: 13, weight: .bold)).foregroundStyle(.secondary)
-                            .frame(width: 28, height: 28).background(Circle().fill(Color(.systemGray5)))
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundStyle(.secondary)
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
@@ -236,9 +233,7 @@ struct EventFormView: View {
                     } label: {
                         Text(isEditing ? "Save" : "Add")
                             .font(.system(size: 15, weight: .semibold))
-                            .foregroundStyle(Color.white)
-                            .padding(.horizontal, 16).padding(.vertical, 7)
-                            .background(Capsule().fill(Color.appAccent))
+                            .foregroundStyle(Color.appAccent)
                     }
                 }
             }
@@ -296,6 +291,8 @@ struct EventFormView: View {
             eventColor      = event.eventColor
             notes           = event.notes
         }
+        // Sync lastStartDay so the first onChange delta is computed correctly.
+        lastStartDay = Calendar.current.startOfDay(for: startDate)
     }
 
     private func save() {
