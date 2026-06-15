@@ -223,7 +223,7 @@ struct EventFormView: View {
                     #selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil
                 )
             }
-            .navigationTitle(isEditing ? "Edit event" : "New event")
+            .navigationTitle(isEditing ? "Edit event" : "New personal event")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -231,6 +231,8 @@ struct EventFormView: View {
                         Image(systemName: "xmark")
                             .font(.system(size: 13, weight: .bold))
                             .foregroundStyle(.secondary)
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {

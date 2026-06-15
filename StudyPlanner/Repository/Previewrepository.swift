@@ -65,7 +65,8 @@ final class PreviewRepository: ExamRepository {
             totalAmount: 320,
             pagesPerHour: 18,
             completedAmount: 0,   // recalculated from logs below
-            studyDays: [.monday, .tuesday, .wednesday, .thursday, .friday, .saturday]
+            studyDays: [.monday, .tuesday, .wednesday, .thursday, .friday, .saturday],
+            createdAt: daysAgo(21)
         )
         inner.saveExam(exam)
 

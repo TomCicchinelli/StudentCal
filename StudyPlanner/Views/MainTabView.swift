@@ -21,7 +21,7 @@ struct MainTabView: View {
             // ── Sliding content ───────────────────────────────────────────
             GeometryReader { geo in
                 HStack(spacing: 0) {
-                    CalendarTabView()
+                    CalendarTabView(selectedTab: $selectedTab)
                         .frame(width: geo.size.width)
 
                     ExamsTabView()

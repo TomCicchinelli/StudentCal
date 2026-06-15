@@ -36,7 +36,7 @@ struct CalendarEvent: Identifiable, Hashable {
 
     var title: String {
         switch kind {
-        case .study(_, let name): return "Study · \(name)"
+        case .study(_, let name): return "Study for \(name)"
         case .exam(_, let name):  return "Exam · \(name)"
         }
     }

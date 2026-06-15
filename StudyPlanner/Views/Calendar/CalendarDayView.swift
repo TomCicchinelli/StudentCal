@@ -79,7 +79,10 @@ struct CalendarDayView: View {
     @Binding var selectedDate: Date
 
     private let hours = Array(0...24)
-    private let commitThreshold: CGFloat = screenWidth * 0.35
+    // Once the peek view is visibly showing, a shorter additional drag should
+    // be enough to commit — 35% of screen width was too far, making swipes
+    // feel like they "snap back" even after a clear peek appeared.
+    private let commitThreshold: CGFloat = screenWidth * 0.22
 
     // ── Transition state ──────────────────────────────────────────────────
     // offset: live position of the current+peek pair during drag & animation.
@@ -91,6 +94,12 @@ struct CalendarDayView: View {
     @State private var peekWeekDate: Date? = nil
     @State private var dayDirection:  CGFloat = 1
     @State private var weekDirection: CGFloat = 1
+
+    /// Maps each exam's ID to its display name, so the timeline can label
+    /// scheduled study blocks with the exam they belong to.
+    private var examNames: [UUID: String] {
+        Dictionary(uniqueKeysWithValues: store.exams.map { ($0.id, $0.name) })
+    }
 
     // MARK: - Body
 
@@ -141,7 +150,8 @@ struct CalendarDayView: View {
                             hours: hours,
                             selectedDate: selectedDate,
                             scheduledBlocks: store.scheduledBlocks(on: selectedDate),
-                            userEvents: store.userEvents(on: selectedDate)
+                            userEvents: store.userEvents(on: selectedDate),
+                            examNames: examNames
                         )
                         .frame(width: w)
                         .offset(x: dayOffset)
@@ -153,7 +163,8 @@ struct CalendarDayView: View {
                                 hours: hours,
                                 selectedDate: peekDate,
                                 scheduledBlocks: store.scheduledBlocks(on: peekDate),
-                                userEvents: store.userEvents(on: peekDate)
+                                userEvents: store.userEvents(on: peekDate),
+                                examNames: examNames
                             )
                             .frame(width: w)
                             .offset(x: dayOffset + dayDirection * w)
@@ -325,6 +336,7 @@ private struct TimelineView: View {
     let selectedDate: Date
     let scheduledBlocks: [ScheduledBlock]
     let userEvents: [UserEvent]
+    let examNames: [UUID: String]
 
     private let hourHeight: CGFloat = 56
     private let labelWidth: CGFloat = 48
@@ -393,7 +405,7 @@ private struct TimelineView: View {
             // ── Scheduled study blocks ────────────────────────────────────
             ForEach(scheduledBlocks) { block in
                 blockView(
-                    title: "Study",
+                    title: examNames[block.examID].map { "Study for \($0)" } ?? "Study",
                     subtitle: durationLabel(block.duration),
                     start: block.date, end: block.endDate,
                     accent: Color.appAccent, bg: Color.appAccentSoft,

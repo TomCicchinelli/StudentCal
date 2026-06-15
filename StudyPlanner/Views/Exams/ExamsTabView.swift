@@ -11,9 +11,9 @@ struct ExamsTabView: View {
     var body: some View {
         NavigationStack {
             if store.exams.isEmpty {
-                // No exam yet → go straight to the creation form.
+                // No exam yet → go straight to the conversational onboarding.
                 // Not dismissable (no Cancel button when there's nothing to go back to).
-                ExamFormView(mode: .create, canCancel: false)
+                ExamOnboardingView(canCancel: false)
             } else {
                 ExamDetailView()
                     .scrollDisabled(true)

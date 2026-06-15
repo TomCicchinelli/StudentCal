@@ -226,7 +226,7 @@
 					};
 				};
 			};
-			buildConfigurationList = XCBL_PROJ /* Build configuration list for PBXProject "StudyPlanner" */;
+			buildConfigurationList = XCBL_PROJ /* Build configuration list for PBXProject "StudentCal" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -471,7 +471,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		XCBL_PROJ /* Build configuration list for PBXProject "StudyPlanner" */ = {
+		XCBL_PROJ /* Build configuration list for PBXProject "StudentCal" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BC_PROJ_DEBUG /* Debug */,

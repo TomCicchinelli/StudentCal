@@ -400,10 +400,17 @@ struct ExamFormView: View {
             if case let .edit(e) = mode { return min(e.completedAmount, total) }
             return 0
         }()
+        // Preserve the original creation date when editing — otherwise every
+        // edit would push the carousel's earliest-browsable day back to today.
+        let createdAt: Date = {
+            if case let .edit(e) = mode { return e.createdAt }
+            return Date()
+        }()
         store.upsert(Exam(id: id, name: name.trimmingCharacters(in: .whitespaces),
                           date: date, studyInterval: interval, unit: unit,
                           totalAmount: total, pagesPerHour: pph,
-                          completedAmount: completed, studyDays: studyDays))
+                          completedAmount: completed, studyDays: studyDays,
+                          createdAt: createdAt))
         dismiss()
     }
 

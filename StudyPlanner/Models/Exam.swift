@@ -88,6 +88,11 @@ struct Exam: Identifiable, Codable, Hashable {
     /// Days of the week the user wants to study.
     var studyDays: Set<Weekday>
 
+    /// When this exam/study plan was created. Used to bound how far back
+    /// the user can browse/log past study days — they shouldn't be able to
+    /// log sessions for dates before the plan existed.
+    var createdAt: Date
+
     init(
         id: UUID = UUID(),
         name: String,
@@ -97,7 +102,8 @@ struct Exam: Identifiable, Codable, Hashable {
         totalAmount: Double,
         pagesPerHour: Double = 5,
         completedAmount: Double = 0,
-        studyDays: Set<Weekday> = [.monday, .tuesday, .thursday, .friday]
+        studyDays: Set<Weekday> = [.monday, .tuesday, .thursday, .friday],
+        createdAt: Date = Date()
     ) {
         self.id = id
         self.name = name
@@ -108,5 +114,31 @@ struct Exam: Identifiable, Codable, Hashable {
         self.pagesPerHour = pagesPerHour
         self.completedAmount = completedAmount
         self.studyDays = studyDays
+        self.createdAt = createdAt
+    }
+
+    // MARK: - Codable
+
+    private enum CodingKeys: String, CodingKey {
+        case id, name, date, studyInterval, unit, totalAmount, pagesPerHour,
+             completedAmount, studyDays, createdAt
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id              = try c.decode(UUID.self, forKey: .id)
+        name            = try c.decode(String.self, forKey: .name)
+        date            = try c.decode(Date.self, forKey: .date)
+        studyInterval   = try c.decode(StudyInterval.self, forKey: .studyInterval)
+        unit            = try c.decode(StudyUnit.self, forKey: .unit)
+        totalAmount     = try c.decode(Double.self, forKey: .totalAmount)
+        pagesPerHour    = try c.decode(Double.self, forKey: .pagesPerHour)
+        completedAmount = try c.decode(Double.self, forKey: .completedAmount)
+        studyDays       = try c.decode(Set<Weekday>.self, forKey: .studyDays)
+        // Existing persisted exams predate this field — fall back to a
+        // reasonable default (30 days back, matching the old carousel
+        // fallback) rather than failing to decode.
+        createdAt = try c.decodeIfPresent(Date.self, forKey: .createdAt)
+            ?? Calendar.current.date(byAdding: .day, value: -30, to: Date()) ?? Date()
     }
 }

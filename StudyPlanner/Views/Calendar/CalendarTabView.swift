@@ -7,6 +7,7 @@ import SwiftUI
 
 struct CalendarTabView: View {
     @Environment(AppStore.self) private var store
+    @Binding var selectedTab: MainTabView.Tab
 
     enum CalendarMode { case month, day }
     @State private var mode: CalendarMode = .day
@@ -34,6 +35,14 @@ struct CalendarTabView: View {
                 EventFormView(mode: .create(defaultDate: selectedDate))
             }
         }
+        // Returning to the Calendar tab from elsewhere always jumps back to
+        // today and the day view, rather than leaving you on whatever
+        // date/mode you last viewed.
+        .onChange(of: selectedTab) { _, newTab in
+            guard newTab == .calendar else { return }
+            selectedDate = Date()
+            mode = .day
+        }
     }
 
     private var titleText: String {
@@ -55,16 +64,22 @@ struct CalendarTabView: View {
             .foregroundStyle(Color.appAccent)
         }
         ToolbarItem(placement: .topBarTrailing) {
-            Button { showNewEvent = true } label: {
+            Button {
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                showNewEvent = true
+            } label: {
                 Image(systemName: "plus")
                     .font(.system(size: 14, weight: .bold))
                     .foregroundStyle(Color.appAccent)
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
             }
+            .accessibilityLabel("New personal event")
         }
     }
 }
 
 #Preview {
-    CalendarTabView()
+    CalendarTabView(selectedTab: .constant(.calendar))
         .environment(AppStore(repository: LocalExamRepository()))
 }

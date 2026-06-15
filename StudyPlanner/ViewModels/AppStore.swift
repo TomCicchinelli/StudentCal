@@ -280,46 +280,18 @@ final class AppStore {
 
     // MARK: - Auto-fill past days
 
+    /// Previously back-filled unlogged past study days with an estimated
+    /// amount so progress always looked "on track." This made the app
+    /// overstate progress for days the user never actually logged.
+    ///
+    /// Now a no-op: unlogged past days simply have no log entry, so
+    /// `loggedAmount` returns nil for them, `completedAmount` reflects only
+    /// real logged amounts, and the UI can show a "Not logged" indicator.
+    /// Kept as a method (rather than removed) since it's called from
+    /// scenePhase changes and after every mutation — removing those call
+    /// sites isn't necessary now that this does nothing.
     func autoFillMissingDays() {
-        let today = Date().startOfDay
-        for exam in exams {
-            guard !exam.studyDays.isEmpty else { continue }
-            let logs          = logsForExam(id: exam.id)
-            let existingDates = Set(logs.map { $0.date.startOfDay })
-            var cursor        = logs.first?.date.startOfDay ?? today
-
-            while cursor < today {
-                defer {
-                    cursor = Calendar.current.date(byAdding: .day, value: 1, to: cursor)
-                        ?? cursor.addingTimeInterval(86_400)
-                }
-                guard let wd = cursor.weekday,
-                      exam.studyDays.contains(wd),
-                      cursor < exam.date.startOfDay,
-                      !existingDates.contains(cursor) else { continue }
-
-                let amount: Double = {
-                    let planned = scheduledBlocks[exam.id]?
-                        .filter { Calendar.current.isDate($0.date, inSameDayAs: cursor) }
-                        .reduce(0) { $0 + $1.duration }
-                    if let p = planned, p > 0 {
-                        switch exam.unit {
-                        case .hours: return p
-                        case .pages: return p * exam.pagesPerHour
-                        }
-                    }
-                    return StudyPlanCalculator.dailyOutput(for: exam)
-                }()
-                guard amount > 0 else { continue }
-                repository.appendLog(StudyLog(examID: exam.id, date: cursor,
-                                              amount: amount, unit: exam.unit))
-            }
-            let updatedTotal = logsForExam(id: exam.id).reduce(0) { $0 + $1.amount }
-            var updated = exam
-            updated.completedAmount = min(exam.totalAmount, updatedTotal)
-            repository.saveExam(updated)
-        }
-        reload()
+        // Intentionally empty.
     }
 
     // MARK: - Schedule recomputation

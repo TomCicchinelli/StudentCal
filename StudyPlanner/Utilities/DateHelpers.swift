@@ -49,6 +49,13 @@ enum DateFormatters {
         return f
     }()
 
+    /// HH:mm — for displaying a scheduled study block's start/end time.
+    static let hourMinute: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "HH:mm"
+        return f
+    }()
+
     /// "May", "June", ... — month picker.
     static let monthName: DateFormatter = {
         let f = DateFormatter()

@@ -129,8 +129,22 @@ enum StudyScheduler {
                 let slot     = states[i].slots[si]
                 let used     = states[i].allocations[si]
                 let slotLeft = slot.length - used
-                let chunk    = min(increment, min(remaining, slotLeft))
-                guard chunk >= minChunk else { continue }
+                var chunk    = min(increment, min(remaining, slotLeft))
+
+                // Normally skip slivers smaller than minChunk (don't carve a
+                // 2-minute block into a day). But if `remaining` itself is
+                // the final sliver of the whole exam — less than minChunk
+                // overall — and this slot has room for it, allocate it
+                // anyway. Otherwise that last fraction of a page/hour gets
+                // dropped and incorrectly reported as overflow even though
+                // it plainly fits in the available time.
+                if chunk < minChunk {
+                    if remaining < minChunk && slotLeft >= remaining {
+                        chunk = remaining
+                    } else {
+                        continue
+                    }
+                }
 
                 states[i].allocations[si] += chunk
                 remaining                 -= chunk
@@ -148,7 +162,13 @@ enum StudyScheduler {
         for state in states {
             for (si, slot) in state.slots.enumerated() {
                 let hours = state.allocations[si]
-                guard hours >= minChunk else { continue }
+                // Use the same epsilon as the allocation loop (0.001) rather
+                // than minChunk here — a slot can legitimately end up holding
+                // just the final sub-minChunk sliver of the exam's remaining
+                // work (see step 4), and dropping it here would silently lose
+                // that time from the schedule even though it was counted as
+                // "not overflowing".
+                guard hours > 0.001 else { continue }
 
                 let start = state.day.setting(
                     hour:   Int(slot.start),
