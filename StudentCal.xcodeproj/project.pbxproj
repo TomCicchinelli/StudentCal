@@ -58,7 +58,7 @@
 		F016 /* CalendarTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarTabView.swift; sourceTree = "<group>"; };
 		F017 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		F018 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		FAPP /* StudyPlanner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StudyPlanner.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FAPP /* StudentCal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StudentCal.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,7 +72,7 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		GRP_APP /* StudyPlanner */ = {
+		GRP_APP /* StudentCal */ = {
 			isa = PBXGroup;
 			children = (
 				GRP_APPENTRY /* App */,
@@ -83,7 +83,7 @@
 				GRP_VIEWS /* Views */,
 				F018 /* Assets.xcassets */,
 			);
-			path = StudyPlanner;
+			path = StudentCal;
 			sourceTree = "<group>";
 		};
 		GRP_APPENTRY /* App */ = {
@@ -107,7 +107,7 @@
 		GRP_PRODUCTS /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				FAPP /* StudyPlanner.app */,
+				FAPP /* StudentCal.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -125,7 +125,7 @@
 		GRP_ROOT = {
 			isa = PBXGroup;
 			children = (
-				GRP_APP /* StudyPlanner */,
+				GRP_APP /* StudentCal */,
 				GRP_PRODUCTS /* Products */,
 			);
 			sourceTree = "<group>";
@@ -194,9 +194,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		TARGET_MAIN /* StudyPlanner */ = {
+		TARGET_MAIN /* StudentCal */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = XCBL_TARGET /* Build configuration list for PBXNativeTarget "StudyPlanner" */;
+			buildConfigurationList = XCBL_TARGET /* Build configuration list for PBXNativeTarget "StudentCal" */;
 			buildPhases = (
 				PH_SRC /* Sources */,
 				PH_FW /* Frameworks */,
@@ -206,9 +206,9 @@
 			);
 			dependencies = (
 			);
-			name = StudyPlanner;
+			name = StudentCal;
 			productName = StudyPlanner;
-			productReference = FAPP /* StudyPlanner.app */;
+			productReference = FAPP /* StudentCal.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -239,7 +239,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				TARGET_MAIN /* StudyPlanner */,
+				TARGET_MAIN /* StudentCal */,
 			);
 		};
 /* End PBXProject section */
@@ -480,7 +480,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		XCBL_TARGET /* Build configuration list for PBXNativeTarget "StudyPlanner" */ = {
+		XCBL_TARGET /* Build configuration list for PBXNativeTarget "StudentCal" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BC_TARGET_DEBUG /* Debug */,
