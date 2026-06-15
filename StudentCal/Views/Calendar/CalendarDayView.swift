@@ -364,7 +364,12 @@ private struct TimelineView: View {
     // Y position of the now-line within the canvas.
     private var nowY: CGFloat {
         let origin = Double(hours.first ?? 0)
-        return CGFloat(nowFrac - origin) * hourHeight + 8  // +8 for .padding(.top, 8)
+        // No extra offset here: the hour gridlines sit at y = (hour - origin) * hourHeight
+        // within this same ZStack, and the outer .padding(.top, 8) shifts the
+        // whole ZStack (grid + now-line) uniformly. Adding +8 here on top of
+        // that padding double-counted the offset, pushing the now-line about
+        // 8pt (≈8-9 minutes) lower than the hour it actually corresponds to.
+        return CGFloat(nowFrac - origin) * hourHeight
     }
 
     // Short time string shown on the left of the now-line e.g. "2:34"
@@ -436,12 +441,13 @@ private struct TimelineView: View {
 
             // ── Now line (today only) ─────────────────────────────────────
             if isToday {
-                HStack(alignment: .center, spacing: 0) {
+                HStack(alignment: .top, spacing: 0) {
                     // Current time label in place of the hour label
                     Text(nowLabel)
                         .font(.system(size: 10, weight: .semibold))
                         .foregroundStyle(Color.red)
                         .frame(width: labelWidth - 6, alignment: .trailing)
+                        .offset(y: -5.25)   // visually center the label on the line below
 
                     // Red line across the full track
                     Rectangle()
