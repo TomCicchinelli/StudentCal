@@ -29,6 +29,7 @@
 		E23C1C752FBB994F00F99A34 /* Eventformview.swift in Sources */ = {isa = PBXBuildFile; fileRef = E23C1C742FBB994600F99A34 /* Eventformview.swift */; };
 		E23C1C772FBCE50700F99A34 /* Studyscheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = E23C1C762FBCE4FF00F99A34 /* Studyscheduler.swift */; };
 		E27825912FC03B390074EFB1 /* Keyboarddismiss.swift in Sources */ = {isa = PBXBuildFile; fileRef = E27825902FC03B330074EFB1 /* Keyboarddismiss.swift */; };
+		E2C840902FDC439F00413EA0 /* Examonboardingview.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2C8408F2FDC439700413EA0 /* Examonboardingview.swift */; };
 		E2D707012FC04E810047E22F /* Previewrepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2D707002FC04E7C0047E22F /* Previewrepository.swift */; };
 /* End PBXBuildFile section */
 
@@ -37,6 +38,7 @@
 		E23C1C742FBB994600F99A34 /* Eventformview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Eventformview.swift; sourceTree = "<group>"; };
 		E23C1C762FBCE4FF00F99A34 /* Studyscheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Studyscheduler.swift; sourceTree = "<group>"; };
 		E27825902FC03B330074EFB1 /* Keyboarddismiss.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keyboarddismiss.swift; sourceTree = "<group>"; };
+		E2C8408F2FDC439700413EA0 /* Examonboardingview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Examonboardingview.swift; sourceTree = "<group>"; };
 		E2D707002FC04E7C0047E22F /* Previewrepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Previewrepository.swift; sourceTree = "<group>"; };
 		F001 /* StudyPlannerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyPlannerApp.swift; sourceTree = "<group>"; };
 		F002 /* Exam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Exam.swift; sourceTree = "<group>"; };
@@ -175,6 +177,7 @@
 			children = (
 				F011 /* ExamDetailView.swift */,
 				F012 /* ExamFormView.swift */,
+				E2C8408F2FDC439700413EA0 /* Examonboardingview.swift */,
 				F013 /* ExamsTabView.swift */,
 			);
 			path = Exams;
@@ -278,6 +281,7 @@
 				A015 /* CalendarMonthView.swift in Sources */,
 				E23C1C732FBB991300F99A34 /* UserEvent.swift in Sources */,
 				A016 /* CalendarTabView.swift in Sources */,
+				E2C840902FDC439F00413EA0 /* Examonboardingview.swift in Sources */,
 				A017 /* MainTabView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
