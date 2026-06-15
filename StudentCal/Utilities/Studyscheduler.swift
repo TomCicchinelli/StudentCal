@@ -156,6 +156,23 @@ enum StudyScheduler {
 
         if remaining > 0.001 { overflow = true }
 
+        // ── 4b. Round up the final fractional hour ────────────────────────
+        // With 1-hour increments, only the very last allocation made can end
+        // up fractional (e.g. 0.4h). Round that single allocation up to the
+        // next whole hour so no session ends with an awkward ".something"
+        // duration — capped at the slot's own length, since we can't
+        // schedule more time than physically exists in that slot.
+        if let lastDayIdx = states.lastIndex(where: { $0.allocations.contains { $0 > 0.001 } }) {
+            if let lastSlotIdx = states[lastDayIdx].allocations.lastIndex(where: { $0 > 0.001 }) {
+                let current = states[lastDayIdx].allocations[lastSlotIdx]
+                let rounded = current.rounded(.up)
+                if rounded - current > 0.001 {
+                    let slotLength = states[lastDayIdx].slots[lastSlotIdx].length
+                    states[lastDayIdx].allocations[lastSlotIdx] = min(rounded, slotLength)
+                }
+            }
+        }
+
         // ── 5. Emit blocks ───────────────────────────────────────────────
         var blocks: [ScheduledBlock] = []
 
